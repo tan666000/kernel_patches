@@ -1,7 +1,3 @@
-From b3c6f133ac254291579ad35df54d340e9c614189 Mon Sep 17 00:00:00 2001
-From: ShirkNeko <109797057+ShirkNeko@users.noreply.github.com>
-Date: Thu, 14 Aug 2025 21:14:03 +0800
-Subject: [PATCH] sukisu_tracepoint_hooks
 
 ---
  drivers/input/input.c |  8 ++++++++
