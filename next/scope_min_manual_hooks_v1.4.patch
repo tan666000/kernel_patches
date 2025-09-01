@@ -1,3 +1,8 @@
+From b3c6f133ac254291579ad35df54d340e9c614189 Mon Sep 17 00:00:00 2001
+From: ShirkNeko <109797057+ShirkNeko@users.noreply.github.com>
+Date: Thu, 14 Aug 2025 21:14:03 +0800
+Subject: [PATCH] sukisu_tracepoint_hooks
+
 ---
  drivers/input/input.c |  8 ++++++++
  drivers/tty/pty.c     |  8 ++++++++
@@ -98,24 +103,18 @@ diff --git a/fs/open.c b/fs/open.c
 index 39779f1ba..f88cae1bb 100644
 --- a/fs/open.c
 +++ b/fs/open.c
-@@ -34,13 +34,13 @@
- #include <linux/falloc.h>
- #include <linux/fsnotify.h>
- #include <linux/module.h>
--#include "internal.h"
--#include <trace/hooks/syscall_check.h>
--
- #if defined(CONFIG_KSU) && defined(CONFIG_KSU_TRACEPOINT_HOOK)
- #include <../drivers/kernelsu/ksu_trace.h>
- #endif
+@@ -37,6 +37,10 @@
+ #include "internal.h"
+ #include <trace/hooks/syscall_check.h>
  
-+#include "internal.h"
-+#include <trace/hooks/syscall_check.h>
++#if defined(CONFIG_KSU) && defined(CONFIG_KSU_TRACEPOINT_HOOK)
++#include <../drivers/kernelsu/ksu_trace.h>
++#endif
 +
  int do_truncate(struct user_namespace *mnt_userns, struct dentry *dentry,
  		loff_t length, unsigned int time_attrs, struct file *filp)
  {
-@@ -468,6 +468,9 @@ static long do_faccessat(int dfd, const char __user *filename, int mode, int fla
+@@ -468,6 +472,9 @@ static long do_faccessat(int dfd, const char __user *filename, int mode, int fla
  
  SYSCALL_DEFINE3(faccessat, int, dfd, const char __user *, filename, int, mode)
  {
@@ -163,7 +162,7 @@ index 357a1db41..a2d759e48 100644
 +#endif
 +
  /**
-  * generic_fillattr - Fill in the basic attributes from theinode struct
+  * generic_fillattr - Fill in the basic attributes from the inode struct
   * @mnt_userns:	user namespace of the mount the inode was found from
 @@ -408,6 +412,10 @@ SYSCALL_DEFINE4(newfstatat, int, dfd, const char __user *, filename,
  	struct kstat stat;
@@ -189,3 +188,4 @@ index 357a1db41..a2d759e48 100644
  		return error;
 -- 
 2.34.1
+
