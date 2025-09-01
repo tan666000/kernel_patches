@@ -108,22 +108,13 @@ index 39779f1ba..f88cae1bb 100644
  #include <trace/hooks/syscall_check.h>
  
 +#if defined(CONFIG_KSU) && defined(CONFIG_KSU_TRACEPOINT_HOOK)
++#undef TRACE_INCLUDE_PATH
 +#include <../drivers/kernelsu/ksu_trace.h>
 +#endif
 +
  int do_truncate(struct user_namespace *mnt_userns, struct dentry *dentry,
  		loff_t length, unsigned int time_attrs, struct file *filp)
  {
-@@ -468,6 +472,9 @@ static long do_faccessat(int dfd, const char __user *filename, int mode, int fla
- 
- SYSCALL_DEFINE3(faccessat, int, dfd, const char __user *, filename, int, mode)
- {
-+#if defined(CONFIG_KSU) && defined(CONFIG_KSU_TRACEPOINT_HOOK)
-+	trace_ksu_trace_faccessat_hook(&dfd, &filename, &mode, NULL);
-+#endif
- 	return do_faccessat(dfd, filename, mode, 0);
- }
- 
 diff --git a/fs/read_write.c b/fs/read_write.c
 index 3f6818620..926176dfe 100644
 --- a/fs/read_write.c
@@ -186,6 +177,3 @@ index 357a1db41..a2d759e48 100644
  	error = vfs_fstatat(dfd, filename, &stat, flag);
  	if (error)
  		return error;
--- 
-2.34.1
-
