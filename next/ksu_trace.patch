@@ -2,15 +2,15 @@ diff --git a/include/trace/hooks/syscall_check.h b/include/trace/hooks/syscall_c
 --- a/include/trace/hooks/syscall_check.h
 +++ b/include/trace/hooks/syscall_check.h
 @@ -1,7 +1,9 @@
- #ifndef _TRACE_HOOKS_SYSCALL_CHECK_H
- #define _TRACE_HOOKS_SYSCALL_CHECK_H
+#ifndef _TRACE_HOOKS_SYSCALL_CHECK_H
+#define _TRACE_HOOKS_SYSCALL_CHECK_H
  
- #include <linux/tracepoint.h>
+#include <linux/tracepoint.h>
 -#define TRACE_INCLUDE_PATH trace/hooks
 +
 +#ifndef TRACE_INCLUDE_PATH
 +#define TRACE_INCLUDE_PATH trace/hooks
- #endif
- #define TRACE_INCLUDE_FILE syscall_check
+#endif
+#define TRACE_INCLUDE_FILE syscall_check
  
- #undef TRACE_SYSTEM
+#undef TRACE_SYSTEM
