@@ -10,8 +10,7 @@ diff --git a/include/trace/hooks/syscall_check.h b/include/trace/hooks/syscall_c
 +
 +#ifndef TRACE_INCLUDE_PATH
 +#define TRACE_INCLUDE_PATH trace/hooks
- #endif
++#endif
  #define TRACE_INCLUDE_FILE syscall_check
  
  #undef TRACE_SYSTEM
- #define TRACE_SYSTEM syscall_check
