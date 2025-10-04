@@ -1,7 +1,8 @@
 diff --git a/include/trace/hooks/syscall_check.h b/include/trace/hooks/syscall_check.h
+index 1234567..890abcd 100644
 --- a/include/trace/hooks/syscall_check.h
 +++ b/include/trace/hooks/syscall_check.h
-@@ -1,8 +1,10 @@
+@@ -1,7 +1,9 @@
  #ifndef _TRACE_HOOKS_SYSCALL_CHECK_H
  #define _TRACE_HOOKS_SYSCALL_CHECK_H
  
@@ -12,5 +13,3 @@ diff --git a/include/trace/hooks/syscall_check.h b/include/trace/hooks/syscall_c
 +#define TRACE_INCLUDE_PATH trace/hooks
 +#endif
  #define TRACE_INCLUDE_FILE syscall_check
- 
- #undef TRACE_SYSTEM
