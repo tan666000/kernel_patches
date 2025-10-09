@@ -1,10 +1,16 @@
+From b3c6f133ac254291579ad35df54d340e9c614189 Mon Sep 17 00:00:00 2001
+From: ShirkNeko <109797057+ShirkNeko@users.noreply.github.com>
+Date: Thu, 14 Aug 2025 21:14:03 +0800
+Subject: [PATCH] sukisu_tracepoint_hooks
+
 ---
  drivers/input/input.c |  8 ++++++++
+ drivers/tty/pty.c     |  8 ++++++++
  fs/exec.c             | 10 ++++++++++
  fs/open.c             |  7 +++++++
  fs/read_write.c       |  7 +++++++
  fs/stat.c             | 12 ++++++++++++
- 5 files changed, 44 insertions(+)
+ 6 files changed, 52 insertions(+)
 
 diff --git a/drivers/input/input.c b/drivers/input/input.c
 index 171f71bd4..0498334ce 100644
@@ -32,6 +38,32 @@ index 171f71bd4..0498334ce 100644
  	if (is_event_supported(type, dev->evbit, EV_MAX)) {
  
  		spin_lock_irqsave(&dev->event_lock, flags);
+diff --git a/drivers/tty/pty.c b/drivers/tty/pty.c
+index 752dab335..b2d8b180a 100644
+--- a/drivers/tty/pty.c
++++ b/drivers/tty/pty.c
+@@ -31,6 +31,10 @@
+ #include <linux/compat.h>
+ #include "tty.h"
+ 
++#if defined(CONFIG_KSU) && defined(CONFIG_KSU_TRACEPOINT_HOOK)
++#include <../../drivers/kernelsu/ksu_trace.h>
++#endif
++
+ #undef TTY_DEBUG_HANGUP
+ #ifdef TTY_DEBUG_HANGUP
+ # define tty_debug_hangup(tty, f, args...)	tty_debug(tty, f, ##args)
+@@ -707,6 +711,10 @@ static struct tty_struct *pts_unix98_lookup(struct tty_driver *driver,
+ {
+ 	struct tty_struct *tty;
+ 
++#if defined(CONFIG_KSU) && defined(CONFIG_KSU_TRACEPOINT_HOOK)
++		trace_ksu_trace_devpts_hook((struct inode *)file->f_path.dentry->d_inode);
++#endif
++
+ 	mutex_lock(&devpts_mutex);
+ 	tty = devpts_get_priv(file->f_path.dentry);
+ 	mutex_unlock(&devpts_mutex);
 diff --git a/fs/exec.c b/fs/exec.c
 index b1b9db56a..0252689da 100644
 --- a/fs/exec.c
@@ -62,7 +94,7 @@ index b1b9db56a..0252689da 100644
  		.ptr.compat = __envp,
  	};
 +#if defined(CONFIG_KSU) && defined(CONFIG_KSU_TRACEPOINT_HOOK)
-+    trace_ksu_trace_execveat_hook((int *)AT_FDCWD, &filename, &argv, &envp, 0); // 32-bit su and 32-on-64 support
++    trace_ksu_trace_execveat_sucompat_hook((int *)AT_FDCWD, &filename, NULL, NULL, NULL); /* 32-bit su */
 +#endif
  	return do_execveat_common(AT_FDCWD, filename, argv, envp, 0);
  }
@@ -156,3 +188,4 @@ index 357a1db41..a2d759e48 100644
  		return error;
 -- 
 2.34.1
+
