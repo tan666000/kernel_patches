@@ -1,9 +1,6 @@
 --- a/kernel/sulog.h
 +++ b/kernel/sulog.h
-@@ -1,11 +1,6 @@
- #ifndef __KSU_SULOG_H
- #define __KSU_SULOG_H
- 
+@@ -4,10 +4,7 @@
  #include <linux/types.h>
  #include <linux/version.h>
  
@@ -13,3 +10,6 @@
 -#define __SULOG_GATE        0
 -#endif
 +#define __SULOG_GATE        1
+ 
+ #if __SULOG_GATE
+ extern struct timezone sys_tz;
