@@ -1,15 +1,1 @@
---- a/kernel/sulog.h
-+++ b/kernel/sulog.h
-@@ -4,10 +4,7 @@
- #include <linux/types.h>
- #include <linux/version.h>
- 
--#if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 10, 245)
--#define __SULOG_GATE        1
--#else
--#define __SULOG_GATE        0
--#endif
-+#define __SULOG_GATE        1
- 
- #if __SULOG_GATE
- extern struct timezone sys_tz;
+
