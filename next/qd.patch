@@ -1,5 +1,5 @@
---- a/ksu_sulog.h
-+++ b/ksu_sulog.h
+--- a/kernel/sulog.h
++++ b/kernel/sulog.h
 @@ -1,11 +1,6 @@
  #ifndef __KSU_SULOG_H
  #define __KSU_SULOG_H
