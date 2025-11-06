@@ -1,8 +1,7 @@
-From 56429b175ff0022e49596d2de9a965ba5c7b4aaa Mon Sep 17 00:00:00 2001
+From 98345832aea56695842622081cb0d2ff7963157d Mon Sep 17 00:00:00 2001
 From: ShirkNeko <109797057+ShirkNeko@users.noreply.github.com>
-From: AlexLiuDev233 <wzylin11@outlook.com>
-Date: Tue, 4 Nov 2025 01:19:54 +0800
-Subject: [PATCH] scope_min_manual_hooks_v1.6.patch
+Date: Thu, 6 Nov 2025 15:16:38 +0800
+Subject: [PATCH] scope_min_manual_hooks_v1.6
 
 ---
  drivers/input/input.c | 10 ++++++++++
@@ -14,7 +13,7 @@ Subject: [PATCH] scope_min_manual_hooks_v1.6.patch
  6 files changed, 63 insertions(+)
 
 diff --git a/drivers/input/input.c b/drivers/input/input.c
-index 171f71bd4c2a..8258f0a306e4 100644
+index 171f71bd4..8258f0a30 100644
 --- a/drivers/input/input.c
 +++ b/drivers/input/input.c
 @@ -446,11 +446,21 @@ static void input_handle_event(struct input_dev *dev,
@@ -40,44 +39,43 @@ index 171f71bd4c2a..8258f0a306e4 100644
  
  		spin_lock_irqsave(&dev->event_lock, flags);
 diff --git a/fs/exec.c b/fs/exec.c
-index b1b9db56a609..9748c2315677 100644
+index b1b9db56a..e90e89f29 100644
 --- a/fs/exec.c
 +++ b/fs/exec.c
-@@ -2031,12 +2031,22 @@ int kernel_execve(const char *kernel_filename,
- 	return retval;
+@@ -2108,11 +2108,21 @@ void set_dumpable(struct mm_struct *mm, int value)
+ 	set_mask_bits(&mm->flags, MMF_DUMPABLE_MASK, value);
  }
  
 +#if defined(CONFIG_KSU) && defined(CONFIG_KSU_MANUAL_HOOK)
 +__attribute__((hot))
-+extern int ksu_handle_execveat(int *fd,
-+			struct filename **filename_ptr,
-+			void *argv, void *envp, int *flags);
++extern int ksu_handle_execve_sucompat(int *fd,	const char __user **filename_user,
++				void *__never_use_argv,	void *__never_use_envp,
++				int *__never_use_flags);
 +#endif
 +
- static int do_execve(struct filename *filename,
- 	const char __user *const __user *__argv,
- 	const char __user *const __user *__envp)
+ SYSCALL_DEFINE3(execve,
+ 		const char __user *, filename,
+ 		const char __user *const __user *, argv,
+ 		const char __user *const __user *, envp)
  {
- 	struct user_arg_ptr argv = { .ptr.native = __argv };
- 	struct user_arg_ptr envp = { .ptr.native = __envp };
 +#if defined(CONFIG_KSU) && defined(CONFIG_KSU_MANUAL_HOOK)
-+	ksu_handle_execveat((int *)AT_FDCWD, &filename, &argv, &envp, 0);
++	ksu_handle_execve_sucompat((int *)AT_FDCWD, &filename, NULL, NULL, NULL);
 +#endif
- 	return do_execveat_common(AT_FDCWD, filename, argv, envp, 0);
+ 	return do_execve(getname(filename), argv, envp);
  }
  
-@@ -2064,6 +2074,9 @@ static int compat_do_execve(struct filename *filename,
- 		.is_compat = true,
- 		.ptr.compat = __envp,
- 	};
-+#if defined(CONFIG_KSU) && defined(CONFIG_KSU_MANUAL_HOOK) // 32-bit su and 32-on-64 support
-+	ksu_handle_execveat((int *)AT_FDCWD, &filename, &argv, &envp, 0);
+@@ -2132,6 +2142,9 @@ COMPAT_SYSCALL_DEFINE3(execve, const char __user *, filename,
+ 	const compat_uptr_t __user *, argv,
+ 	const compat_uptr_t __user *, envp)
+ {
++#if defined(CONFIG_KSU) && defined(CONFIG_KSU_MANUAL_HOOK) // 32-bit ksud and 32-on-64 support
++	ksu_handle_execve_sucompat((int *)AT_FDCWD, &filename, NULL, NULL, NULL);
 +#endif
- 	return do_execveat_common(AT_FDCWD, filename, argv, envp, 0);
+ 	return compat_do_execve(getname(filename), argv, envp);
  }
  
 diff --git a/fs/open.c b/fs/open.c
-index 39779f1ba4e1..1dcbefbdd157 100644
+index 39779f1ba..1dcbefbdd 100644
 --- a/fs/open.c
 +++ b/fs/open.c
 @@ -466,8 +466,17 @@ static long do_faccessat(int dfd, const char __user *filename, int mode, int fla
@@ -99,7 +97,7 @@ index 39779f1ba4e1..1dcbefbdd157 100644
  }
  
 diff --git a/fs/read_write.c b/fs/read_write.c
-index 3f68186207a9..b2a45d21547c 100644
+index 3f6818620..b2a45d215 100644
 --- a/fs/read_write.c
 +++ b/fs/read_write.c
 @@ -628,8 +628,18 @@ ssize_t ksys_read(unsigned int fd, char __user *buf, size_t count)
@@ -122,7 +120,7 @@ index 3f68186207a9..b2a45d21547c 100644
  }
  
 diff --git a/fs/stat.c b/fs/stat.c
-index 357a1db410ec..d5087ca1fa01 100644
+index 357a1db41..d5087ca1f 100644
 --- a/fs/stat.c
 +++ b/fs/stat.c
 @@ -401,6 +401,12 @@ SYSCALL_DEFINE2(newlstat, const char __user *, filename,
@@ -159,7 +157,7 @@ index 357a1db410ec..d5087ca1fa01 100644
  	if (error)
  		return error;
 diff --git a/kernel/reboot.c b/kernel/reboot.c
-index 5105f2a46359..284c97c04535 100644
+index 5105f2a46..c0bf3597d 100644
 --- a/kernel/reboot.c
 +++ b/kernel/reboot.c
 @@ -305,6 +305,11 @@ EXPORT_SYMBOL_GPL(kernel_power_off);
