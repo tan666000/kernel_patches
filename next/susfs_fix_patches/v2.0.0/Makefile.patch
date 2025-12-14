@@ -1,5 +1,5 @@
 --- KernelSU-Next/kernel/Makefile.bak	2025-12-14 04:49:54.000000000 -0500
-+++ KernelSU-Next/kernel/Makefile	2025-12-14 03:48:58.553531723 -0500
++++ KernelSU-Next/kernel/Makefile	2025-12-14 04:23:08.708404645 -0500
 @@ -3,7 +3,7 @@
  kernelsu-objs += app_profile.o
  kernelsu-objs += apk_sign.o
@@ -9,9 +9,9 @@
  kernelsu-objs += throne_tracker.o
  kernelsu-objs += pkg_observer.o
  kernelsu-objs += setuid_hook.o
-@@ -97,4 +97,14 @@
- clean:
- 	make -C $(KDIR) M=$(MDIR) clean
+@@ -90,6 +90,16 @@
+ ccflags-y += -Wno-strict-prototypes -Wno-int-conversion -Wno-gcc-compat -Wno-missing-prototypes
+ ccflags-y += -Wno-declaration-after-statement -Wno-unused-function
  
 +## For susfs stuff ##
 +ifeq ($(shell test -e $(srctree)/fs/susfs.c; echo $$?),0)
@@ -23,5 +23,6 @@
 +$(info -- Read: https://gitlab.com/simonpunk/susfs4ksu)
 +endif
 +
- # Keep a new line here!! Because someone may append config
-\ No newline at end of file
+ all:
+ 	make -C $(KDIR) M=$(MDIR) modules
+ compdb:
