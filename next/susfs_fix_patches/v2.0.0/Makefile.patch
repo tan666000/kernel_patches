@@ -1,5 +1,14 @@
---- a/kernel/Makefile
-+++ b/kernel/Makefile
+--- KernelSU-Next/kernel/Makefile.bak	2025-12-14 04:49:54.000000000 -0500
++++ KernelSU-Next/kernel/Makefile	2025-12-14 03:48:58.553531723 -0500
+@@ -3,7 +3,7 @@
+ kernelsu-objs += app_profile.o
+ kernelsu-objs += apk_sign.o
+ kernelsu-objs += sucompat.o
+-kernelsu-objs += syscall_hook_manager.o
++# kernelsu-objs += syscall_hook_manager.o
+ kernelsu-objs += throne_tracker.o
+ kernelsu-objs += pkg_observer.o
+ kernelsu-objs += setuid_hook.o
 @@ -97,4 +97,14 @@
  clean:
  	make -C $(KDIR) M=$(MDIR) clean
