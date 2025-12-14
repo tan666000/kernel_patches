@@ -1,5 +1,5 @@
---- a/kernel/sucompat.c
-+++ b/kernel/sucompat.c
+--- KernelSU-Next/kernel/sucompat.c.bak	2025-12-14 04:49:54.000000000 -0500
++++ KernelSU-Next/kernel/sucompat.c	2025-12-14 04:00:30.777419581 -0500
 @@ -75,6 +75,7 @@
  	return userspace_stack_buffer(ksud_path, sizeof(ksud_path));
  }
@@ -8,3 +8,12 @@
  int ksu_handle_faccessat(int *dfd, const char __user **filename_user,
  		int *mode, int *__unused_flags)
  {
+@@ -181,7 +182,7 @@
+     if (current->pid != 1 && is_init(get_current_cred())) {
+         if (unlikely(strcmp(filename->name, KSUD_PATH) == 0)) {
+             pr_info("hook_manager: escape to root for init executing ksud: %d\n", current->pid);
+-            escape_to_root_for_init();
++            escape_with_root_profile();
+         } else if (likely(strstr(filename->name, "/app_process") == NULL && strstr(filename->name, "/adbd") == NULL)) {
+             pr_info("hook_manager: unmark %d exec %s\n", current->pid, filename->name);
+             susfs_set_current_proc_umounted();
