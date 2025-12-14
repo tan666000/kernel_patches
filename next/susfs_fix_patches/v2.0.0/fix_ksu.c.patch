@@ -1,0 +1,33 @@
+--- a/kernel/ksu.c
++++ b/kernel/ksu.c
+@@ -33,11 +33,17 @@ int __init kernelsu_init(void)
+ 
+ 	ksu_supercalls_init();
+ 
++#ifndef CONFIG_KSU_SUSFS
+ 	ksu_syscall_hook_manager_init();
++#endif
+ 
+ 	ksu_allowlist_init();
+ 
+ 	ksu_throne_tracker_init();
++
++#ifdef CONFIG_KSU_SUSFS
++	susfs_init();
++#endif
+ 
+ 	ksu_ksud_init();
+ 
+@@ -58,9 +64,11 @@ void kernelsu_exit(void)
+ 
+ 	ksu_observer_exit();
+ 
++#ifndef CONFIG_KSU_SUSFS
+ 	ksu_ksud_exit();
+ 
+ 	ksu_syscall_hook_manager_exit();
++#endif
+ 
+ 	ksu_supercalls_exit();
+ 
+
