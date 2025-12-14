@@ -1,6 +1,6 @@
 --- a/kernel/Makefile
 +++ b/kernel/Makefile
-@@ -97,4 +97,13 @@ compdb:
+@@ -97,4 +97,14 @@
  clean:
  	make -C $(KDIR) M=$(MDIR) clean
  
@@ -13,5 +13,6 @@
 +$(info -- You have not integrated susfs in your kernel yet.)
 +$(info -- Read: https://gitlab.com/simonpunk/susfs4ksu)
 +endif
++
  # Keep a new line here!! Because someone may append config
-
+\ No newline at end of file

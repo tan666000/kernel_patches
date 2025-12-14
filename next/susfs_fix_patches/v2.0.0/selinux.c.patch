@@ -1,9 +1,12 @@
 --- a/kernel/selinux/selinux.c
 +++ b/kernel/selinux/selinux.c
-@@ -152,3 +152,94 @@ u32 ksu_get_ksu_file_sid()
+@@ -151,4 +151,95 @@
+         pr_info("get ksufile sid err %d\n", err);
      }
      return ksu_file_sid;
- }
+-}
+\ No newline at end of file
++}
 +
 +#ifdef CONFIG_KSU_SUSFS
 +#define KERNEL_INIT_DOMAIN "u:r:init:s0"
@@ -74,7 +77,7 @@
 +
 +void susfs_set_ksu_sid(void)
 +{
-+    susfs_set_sid(KERNEL_SU_CONTEXT, &susfs_ksu_sid);
++    susfs_set_sid(KERNEL_SU_DOMAIN, &susfs_ksu_sid);
 +}
 +
 +bool susfs_is_current_ksu_domain(void) {
@@ -94,5 +97,5 @@
 +{
 +    susfs_set_sid(KERNEL_PRIV_APP_DOMAIN, &susfs_priv_app_sid);
 +}
-+#endif
-
++#endif // #ifdef CONFIG_KSU_SUSFS
+\ No newline at end of file

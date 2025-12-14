@@ -1,8 +1,8 @@
 --- a/kernel/selinux/selinux.h
 +++ b/kernel/selinux/selinux.h
-@@ -34,4 +34,17 @@ int handle_sepolicy(unsigned long arg3, void __user *arg4);
+@@ -25,4 +25,17 @@
  
- void setup_ksu_cred();
+ int handle_sepolicy(unsigned long arg3, void __user *arg4);
  
 +#ifdef CONFIG_KSU_SUSFS
 +bool susfs_is_sid_equal(void *sec, u32 sid2);
@@ -15,7 +15,7 @@
 +void susfs_set_init_sid(void);
 +bool susfs_is_current_init_domain(void);
 +void susfs_set_priv_app_sid(void);
-+#endif
++#endif // #ifdef CONFIG_KSU_SUSFS
 +
  #endif
-
+\ No newline at end of file
