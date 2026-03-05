@@ -1,14 +1,17 @@
---- a/fs/proc/base.c	2026-01-02 21:19:48.950240379 -0500
-+++ b/fs/proc/base.c	2026-01-02 21:20:55.078301497 -0500
-@@ -863,6 +863,22 @@
+--- a/fs/proc/base.c
++++ b/fs/proc/base.c
+@@ -923,6 +929,25 @@ static ssize_t mem_rw(struct file *file, char __user *buf,
  
  	while (count > 0) {
- 		int this_len = min_t(int, count, PAGE_SIZE);
+ 		size_t this_len = min_t(size_t, count, PAGE_SIZE);
 +#ifdef CONFIG_KSU_SUSFS_SUS_MAP
 +		vma = find_vma(mm, addr);
 +		if (vma && vma->vm_file) {
 +			struct inode *inode = file_inode(vma->vm_file);
-+			if (unlikely(inode->i_mapping->flags & BIT_SUS_MAPS) && susfs_is_current_proc_umounted()) {
++			if (inode->i_mapping &&
++				unlikely(test_bit(AS_FLAGS_SUS_MAP, &inode->i_mapping->flags) &&
++				susfs_is_current_proc_umounted_app()))
++			{
 +				if (write) {
 +					copied = -EFAULT;
 +				} else {

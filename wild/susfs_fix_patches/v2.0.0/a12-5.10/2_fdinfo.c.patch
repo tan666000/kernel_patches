@@ -1,5 +1,5 @@
---- a/fs/notify/fdinfo.c	2025-12-28 06:28:12.000000000 -0500
-+++ b/fs/notify/fdinfo.c	2025-12-28 02:10:51.533492084 -0500
+--- a/fs/notify/fdinfo.c
++++ b/fs/notify/fdinfo.c
 @@ -111,6 +111,38 @@
  		 * used only internally to the kernel.
  		 */
@@ -24,7 +24,7 @@
 +			}
 +			seq_printf(m, "inotify wd:%x ino:%lx sdev:%x mask:%x ignored_mask:0 ",
 +					inode_mark->wd, path.dentry->d_inode->i_ino, path.dentry->d_inode->i_sb->s_dev,
-+					mark->ignored_mask);
++					mask);
 +			show_mark_fhandle(m, path.dentry->d_inode);
 +			seq_putc(m, '\n');
 +			iput(inode);
