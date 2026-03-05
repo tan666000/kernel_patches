@@ -1,12 +1,12 @@
 --- a/fs/proc/task_mmu.c
 +++ b/fs/proc/task_mmu.c
-@@ -1814,6 +1893,9 @@ static ssize_t pagemap_read(struct file *file, char __user *buf,
- 	unsigned long start_vaddr;
- 	unsigned long end_vaddr;
- 	int ret = 0, copied = 0;
+@@ -1814,6 +1814,9 @@
+ 	/* Ensure the address is inside the task */
+ 	if (start_vaddr > mm->task_size)
+ 		start_vaddr = end_vaddr;
 +#ifdef CONFIG_KSU_SUSFS_SUS_MAP
 +	struct vm_area_struct *vma;
 +#endif
  
- 	if (!mm || !mmget_not_zero(mm))
- 		goto out;
+ 	ret = 0;
+ 	while (count && (start_vaddr < end_vaddr)) {

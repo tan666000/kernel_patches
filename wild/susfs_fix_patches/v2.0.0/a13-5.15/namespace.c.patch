@@ -1,6 +1,6 @@
---- a/fs/namespace.c	2026-01-01 02:09:16.377265000 -0500
-+++ b/fs/namespace.c	2026-01-01 02:28:23.543873062 -0500
-@@ -32,10 +32,24 @@
+--- a/fs/namespace.c
++++ b/fs/namespace.c
+@@ -31,10 +31,24 @@
  #include <uapi/linux/mount.h>
  #include <linux/fs_context.h>
  #include <linux/shmem_fs.h>
