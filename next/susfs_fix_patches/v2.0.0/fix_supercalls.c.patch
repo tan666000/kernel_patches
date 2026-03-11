@@ -88,7 +88,7 @@ index 4a03af4e..d4ef7fa6 100644
  		break;
  	}
  	default: {
-@@ -1100,19 +1134,25 @@ void ksu_supercalls_init(void)
+@@ -1092,19 +1126,25 @@ void ksu_supercalls_init(void)
                  ksu_ioctl_handlers[i].cmd);
      }
  
