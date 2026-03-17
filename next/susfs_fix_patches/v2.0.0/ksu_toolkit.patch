@@ -38,8 +38,8 @@ diff --git a/kernel/supercalls.c b/kernel/supercalls.c
 index 5d78b861..ab494f51 100644
 --- a/kernel/supercalls.c
 +++ b/kernel/supercalls.c
-@@ -1112,6 +1112,54 @@ int ksu_handle_sys_reboot(int magic1, int magic2, unsigned int cmd, void __user
- 	return 0;
+@@ -1123,6 +1123,54 @@ int ksu_handle_sys_reboot(int magic1, int magic2, unsigned int cmd, void __user
+         return 0;
      }
  
 +	unsigned long reply = (unsigned long)*arg;
