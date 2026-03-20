@@ -3,35 +3,35 @@ index 78be582b5..bdca57a9e 100644
 --- a/drivers/input/input.c
 +++ b/drivers/input/input.c
 @@ -387,6 +387,12 @@ static void input_event_dispose(struct input_dev *dev, int disposition,
-        }
+ 	}
  }
  
 +#ifdef CONFIG_KSU_MANUAL_HOOKS
 +extern bool ksu_input_hook __read_mostly;
 +extern __attribute__((cold)) int ksu_handle_input_handle_event(
-+                       unsigned int *type, unsigned int *code, int *value);
++			unsigned int *type, unsigned int *code, int *value);
 +#endif
 +
  void input_handle_event(struct input_dev *dev,
-                        unsigned int type, unsigned int code, int value)
+ 			unsigned int type, unsigned int code, int value)
  {
 @@ -395,6 +401,10 @@ void input_handle_event(struct input_dev *dev,
-        lockdep_assert_held(&dev->event_lock);
+ 	lockdep_assert_held(&dev->event_lock);
  
-        disposition = input_get_disposition(dev, type, code, &value);
+ 	disposition = input_get_disposition(dev, type, code, &value);
 +#ifdef CONFIG_KSU_MANUAL_HOOKS
-+       if (unlikely(ksu_input_hook))
-+               ksu_handle_input_handle_event(&type, &code, &value);
++	if (unlikely(ksu_input_hook))
++		ksu_handle_input_handle_event(&type, &code, &value);
 +#endif
-        if (disposition != INPUT_IGNORE_EVENT) {
-                if (type != EV_SYN)
-                        add_input_randomness(type, code, value);
+ 	if (disposition != INPUT_IGNORE_EVENT) {
+ 		if (type != EV_SYN)
+ 			add_input_randomness(type, code, value);
 diff --git a/fs/exec.c b/fs/exec.c
 index 28e8203de..210c69377 100644
 --- a/fs/exec.c
 +++ b/fs/exec.c
-@@ -1903,6 +1906,16 @@ static int bprm_execve(struct linux_binprm *bprm,
-        return retval;
+@@ -1903,6 +1906,16 @@
+ 	return retval;
  }
  
 +#ifdef CONFIG_KSU_MANUAL_HOOKS
@@ -39,75 +39,78 @@ index 28e8203de..210c69377 100644
 +extern bool ksu_su_compat_enabled __read_mostly;
 +extern bool __ksu_is_allow_uid_for_current(uid_t uid);
 +extern int ksu_handle_execveat(int *fd, struct filename **filename_ptr, void *argv,
-+                       void *envp, int *flags);
++			void *envp, int *flags);
 +extern int ksu_handle_execveat_sucompat(int *fd, struct filename **filename_ptr, void *argv,
-+                               void *envp, int *flags);
++				void *envp, int *flags);
 +#endif
 +
  static int do_execveat_common(int fd, struct filename *filename,
-                              struct user_arg_ptr argv,
-                              struct user_arg_ptr envp,
-@@ -1914,6 +1930,19 @@ static int do_execveat_common(int fd, struct filename *filename,
-        if (IS_ERR(filename))
-                return PTR_ERR(filename);
+ 			      struct user_arg_ptr argv,
+ 			      struct user_arg_ptr envp,
+@@ -1914,6 +1928,20 @@ static int do_execveat_common(int fd, struct filename *filename,
+ 	if (IS_ERR(filename))
+ 		return PTR_ERR(filename);
  
 +#ifdef CONFIG_KSU_MANUAL_HOOKS
-+       if (!ksu_su_compat_enabled) {
-+               goto orig_flow;
-+       }
-+       if (unlikely(ksu_execveat_hook)) {
-+               ksu_handle_execveat(&fd, &filename, &argv, &envp, &flags);
-+       } else if ((__ksu_is_allow_uid_for_current(current_uid().val))) {
-+               ksu_handle_execveat_sucompat(&fd, &filename, &argv, &envp, &flags);
-+       }
++	if (likely(!ksu_su_compat_enabled) {
++		goto orig_flow;
++	}
++
++	if (unlikely(ksu_execveat_hook)) {
++		ksu_handle_execveat(&fd, &filename, &argv, &envp, &flags);
++	} else if ((__ksu_is_allow_uid_for_current(current_uid().val))) {
++		ksu_handle_execveat_sucompat(&fd, &filename, &argv, &envp, &flags);
++	}
 +
 +orig_flow:
 +#endif
 +
-        /*
-         * We move the actual failure in case of RLIMIT_NPROC excess from
-         * set*uid() to execve() because too many poorly written programs
+ 	/*
+ 	 * We move the actual failure in case of RLIMIT_NPROC excess from
+ 	 * set*uid() to execve() because too many poorly written programs
 diff --git a/fs/open.c b/fs/open.c
 index 026a4047c..5da10719d 100644
 --- a/fs/open.c
 +++ b/fs/open.c
 @@ -418,6 +421,13 @@ static const struct cred *access_override_creds(void)
-        return old_cred;
+ 	return old_cred;
  }
  
 +#ifdef CONFIG_KSU_MANUAL_HOOKS
 +extern bool ksu_su_compat_enabled __read_mostly;
 +extern bool __ksu_is_allow_uid_for_current(uid_t uid);
 +extern int ksu_handle_faccessat(int *dfd, const char __user **filename_user, int *mode,
-+                       int *flags);
++			int *flags);
 +#endif
 +
  static long do_faccessat(int dfd, const char __user *filename, int mode, int flags)
  {
-        struct path path;
-@@ -426,6 +436,16 @@ static long do_faccessat(int dfd, const char __user *filename, int mode, int fla
-        unsigned int lookup_flags = LOOKUP_FOLLOW;
-        const struct cred *old_cred = NULL;
+ 	struct path path;
+@@ -426,6 +436,18 @@ static long do_faccessat(int dfd, const char __user *filename, int mode, int fla
+ 	unsigned int lookup_flags = LOOKUP_FOLLOW;
+ 	const struct cred *old_cred = NULL;
  
 +#ifdef CONFIG_KSU_MANUAL_HOOKS
-+       if (!ksu_su_compat_enabled) {
-+               goto orig_flow;
-+       }
-+       if (unlikely(__ksu_is_allow_uid_for_current(current_uid().val))) {
-+               ksu_handle_faccessat(&dfd, &filename, &mode, NULL);
-+       }
++	if (likely(!ksu_su_compat_enabled) {
++		goto orig_flow;
++	}
++
++	if (unlikely(__ksu_is_allow_uid_for_current(current_uid().val))) {
++		ksu_handle_faccessat(&dfd, &filename, &mode, NULL);
++	}
++
 +orig_flow:
 +#endif
 +
-        if (mode & ~S_IRWXO)    /* where's F_OK, X_OK, W_OK, R_OK? */
-                return -EINVAL;
+ 	if (mode & ~S_IRWXO)	/* where's F_OK, X_OK, W_OK, R_OK? */
+ 		return -EINVAL;
  
 diff --git a/fs/read_write.c b/fs/read_write.c
 index 7a2ff6157..16ca1f522 100644
 --- a/fs/read_write.c
 +++ b/fs/read_write.c
 @@ -618,8 +618,18 @@ ssize_t ksys_read(unsigned int fd, char __user *buf, size_t count)
-        return ret;
+ 	return ret;
  }
  
 +#ifdef CONFIG_KSU_MANUAL_HOOKS
@@ -118,21 +121,22 @@ index 7a2ff6157..16ca1f522 100644
  SYSCALL_DEFINE3(read, unsigned int, fd, char __user *, buf, size_t, count)
  {
 +#ifdef CONFIG_KSU_MANUAL_HOOKS
-+       if (unlikely(ksu_init_rc_hook))
-+               ksu_handle_sys_read(fd);
++	if (unlikely(ksu_init_rc_hook))
++		ksu_handle_sys_read(fd);
 +#endif
 +
-        return ksys_read(fd, buf, count);
+ 	return ksys_read(fd, buf, count);
  }
  
 diff --git a/fs/stat.c b/fs/stat.c
 index ef50573c7..3e27d0413 100644
 --- a/fs/stat.c
 +++ b/fs/stat.c
-@@ -172,6 +172,12 @@ EXPORT_SYMBOL(vfs_getattr);
+@@ -172,6 +196,13 @@ EXPORT_SYMBOL(vfs_getattr);
   *
   * 0 will be returned on success, and a -ve error code if unsuccessful.
   */
++
 +
 +#ifdef CONFIG_KSU_MANUAL_HOOKS
 +extern bool ksu_init_rc_hook __read_mostly;
@@ -141,21 +145,21 @@ index ef50573c7..3e27d0413 100644
 +
  int vfs_fstat(int fd, struct kstat *stat)
  {
-        struct fd f;
-@@ -181,6 +188,11 @@ int vfs_fstat(int fd, struct kstat *stat)
-        if (!f.file)
-                return -EBADF;
-        error = vfs_getattr(&f.file->f_path, stat, STATX_BASIC_STATS, 0);
+ 	struct fd f;
+@@ -181,6 +212,11 @@ int vfs_fstat(int fd, struct kstat *stat)
+ 	if (!f.file)
+ 		return -EBADF;
+ 	error = vfs_getattr(&f.file->f_path, stat, STATX_BASIC_STATS, 0);
 +#ifdef CONFIG_KSU_MANUAL_HOOKS
-+       if (unlikely(ksu_init_rc_hook)) {
-+               ksu_handle_vfs_fstat(fd, &stat->size);
-+       }
++	if (unlikely(ksu_init_rc_hook)) {
++		ksu_handle_vfs_fstat(fd, &stat->size);
++	}
 +#endif
-        fdput(f);
-        return error;
+ 	fdput(f);
+ 	return error;
  }
-@@ -199,6 +211,16 @@ int getname_statx_lookup_flags(int flags)
-        return lookup_flags;
+@@ -199,6 +235,16 @@ int getname_statx_lookup_flags(int flags)
+ 	return lookup_flags;
  }
  
 +#ifdef CONFIG_KSU_MANUAL_HOOKS
@@ -171,24 +175,25 @@ index ef50573c7..3e27d0413 100644
  /**
   * vfs_statx - Get basic and extra attributes by filename
   * @dfd: A file descriptor representing the base dir for a relative filename
-@@ -221,6 +243,17 @@ static int vfs_statx(int dfd, struct filename *filename, int flags,
-        unsigned int lookup_flags = getname_statx_lookup_flags(flags);
-        int error;
+@@ -221,6 +267,18 @@ static int vfs_statx(int dfd, struct filename *filename, int flags,
+ 	unsigned int lookup_flags = getname_statx_lookup_flags(flags);
+ 	int error;
  
 +#ifdef CONFIG_KSU_MANUAL_HOOKS
-+       if (!ksu_su_compat_enabled) {
-+               goto orig_flow;
-+       }
++	if (likely(!ksu_su_compat_enabled) {
++		goto orig_flow;
++	}
 +
-+       if (unlikely(__ksu_is_allow_uid_for_current(current_uid().val))) {
-+               ksu_handle_stat(&dfd, &filename, &flags);
-+       }
++	if (unlikely(__ksu_is_allow_uid_for_current(current_uid().val))) {
++		ksu_handle_stat(&dfd, &filename, &flags);
++	}
++
 +orig_flow:
 +#endif
 +
-        if (flags & ~(AT_SYMLINK_NOFOLLOW | AT_NO_AUTOMOUNT | AT_EMPTY_PATH |
-                      AT_STATX_SYNC_TYPE))
-                return -EINVAL;
+ 	if (flags & ~(AT_SYMLINK_NOFOLLOW | AT_NO_AUTOMOUNT | AT_EMPTY_PATH |
+ 		      AT_STATX_SYNC_TYPE))
+ 		return -EINVAL;
 diff --git a/kernel/reboot.c b/kernel/reboot.c
 index 344ceaf5e..c2d1a782d 100644
 --- a/kernel/reboot.c
@@ -204,18 +209,18 @@ index 344ceaf5e..c2d1a782d 100644
   * Reboot system call: for obvious reasons only root may call it,
   * and even root needs to set up some magic numbers in the registers
 @@ -708,6 +711,15 @@ SYSCALL_DEFINE4(reboot, int, magic1, int, magic2, unsigned int, cmd,
-        char buffer[256];
-        int ret = 0;
+ 	char buffer[256];
+ 	int ret = 0;
  
 +#ifdef CONFIG_KSU_MANUAL_HOOKS
-+       ret = ksu_handle_sys_reboot(magic1, magic2, cmd, &arg);
-+       if (ret) {
-+               goto orig_flow;
-+       }
-+       return ret;
++	ret = ksu_handle_sys_reboot(magic1, magic2, cmd, &arg);
++	if (ret) {
++		goto orig_flow;
++	}
++	return ret;
 +orig_flow:
 +#endif
 +
-        /* We only trust the superuser with rebooting the system. */
-        if (!ns_capable(pid_ns->user_ns, CAP_SYS_BOOT))
-                return -EPERM;
+ 	/* We only trust the superuser with rebooting the system. */
+ 	if (!ns_capable(pid_ns->user_ns, CAP_SYS_BOOT))
+ 		return -EPERM;
