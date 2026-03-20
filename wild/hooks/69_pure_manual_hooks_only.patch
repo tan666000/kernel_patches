@@ -52,7 +52,7 @@ index 28e8203de..210c69377 100644
  		return PTR_ERR(filename);
  
 +#ifdef CONFIG_KSU_MANUAL_HOOKS
-+	if (likely(!ksu_su_compat_enabled) {
++	if (likely(!ksu_su_compat_enabled)) {
 +		goto orig_flow;
 +	}
 +
@@ -91,7 +91,7 @@ index 026a4047c..5da10719d 100644
  	const struct cred *old_cred = NULL;
  
 +#ifdef CONFIG_KSU_MANUAL_HOOKS
-+	if (likely(!ksu_su_compat_enabled) {
++	if (likely(!ksu_su_compat_enabled)) {
 +		goto orig_flow;
 +	}
 +
@@ -180,7 +180,7 @@ index ef50573c7..3e27d0413 100644
  	int error;
  
 +#ifdef CONFIG_KSU_MANUAL_HOOKS
-+	if (likely(!ksu_su_compat_enabled) {
++	if (likely(!ksu_su_compat_enabled)) {
 +		goto orig_flow;
 +	}
 +
